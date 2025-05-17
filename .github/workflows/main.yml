@@ -32,6 +32,7 @@ jobs:
 
       - name: Run MLflow project
         run: |
+          source activate aqi-env
           mlflow run MLProject/ --env-manager=local
 
       - name: Upload MLflow model artifacts
