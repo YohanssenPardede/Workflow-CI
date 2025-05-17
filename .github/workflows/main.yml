@@ -34,33 +34,20 @@ jobs:
           use-mamba: true
 
       - name: Run MLflow project
-        working-directory: MLProject
         run: |
-          export MLFLOW_TRACKING_URI=$(pwd)/mlruns
-          mlflow run . --env-manager=local --experiment-name=AQI_Classification_CI --no-conda
+          mlflow run MLProject/ --env-manager=local --experiment-name=AQI_Classification_CI
         shell: bash -l {0}
 
       - name: Copy model artifacts to repository folder
         run: |
           mkdir -p MLProject/models
           cp -r MLProject/mlruns/*/*/artifacts/model/* MLProject/models/ || echo "Model not found"
-
+      
       - name: Commit and push MLflow artifacts
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git pull origin main
-          git add MLProject/mlruns/
+          git add mlruns/
           git commit -m "Add trained model artifact [CI skip]" || echo "Nothing to commit"
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push Docker image
-        run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aqi-model:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/aqi-model:latest
