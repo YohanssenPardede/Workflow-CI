@@ -5,7 +5,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import numpy as np
+import os
 
+os.makedirs("MLProject/mlruns", exist_ok=True)
+
+mlflow.set_tracking_uri("file:MLProject/mlruns")
 mlflow.set_experiment("AQI_Classification_CI")
 
 df = pd.read_csv("aqi_preprocessing.csv")
