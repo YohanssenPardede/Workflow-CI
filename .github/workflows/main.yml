@@ -1,4 +1,4 @@
-name: Train AQI Model and Upload Artifacts
+name: Train AQI Model and Save to Repo
 
 on:
   push:
@@ -32,12 +32,21 @@ jobs:
 
       - name: Run MLflow project
         run: |
-          mlflow run MLProject/ --env-manager=local --experiment-name AQI_Classification_CI
+          mlflow run MLProject/ --env-manager=local
         shell: bash -l {0}
 
-      - name: Upload MLflow model artifacts
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: trained-model
-          path: mlruns/**/artifacts/model
+      - name: Copy model artifacts to repository folder
+        run: |
+          mkdir -p MLProject/models
+          cp -r MLProject/mlruns/*/*/artifacts/model/* MLProject/models/ || echo "Model not found"
+
+      - name: Commit and push model artifacts
+        run: |
+          git config --global user.email "yohanssenpardede@gmail.com"
+          git config --global user.name "YohanssenPardede"
+          git pull origin main
+          git add MLProject/models
+          git commit -m "Add trained model artifact [CI skip]" || echo "Nothing to commit"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{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}}
