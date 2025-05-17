@@ -41,7 +41,7 @@ jobs:
       - name: Copy model artifacts to repository folder
         run: |
           mkdir -p MLProject/models
-          cp -r mlruns/*/*/artifacts/model/* MLProject/models/ || echo "Model not found"
+          cp -r MLProject/mlruns/*/*/artifacts/model/* MLProject/models/ || echo "Model not found"
 
       - name: Commit and push MLflow artifacts
         run: |
