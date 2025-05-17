@@ -68,6 +68,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: MLProject
+          file: MLProject/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/aqi-model:latest,${{ secrets.DOCKERHUB_USERNAME }}/aqi-model:${{ github.sha }}
