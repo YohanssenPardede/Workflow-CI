@@ -22,7 +22,7 @@ jobs:
             ${{ runner.os }}-conda-env-
 
       - name: Set up Miniconda with mamba
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v2.1.4
         with:
           activate-environment: aqi-env
           environment-file: MLProject/conda.yml
