@@ -32,7 +32,7 @@ jobs:
 
       - name: Run MLflow project
         run: |
-          mlflow run MLProject/ --env-manager=local
+          mlflow run MLProject/ --env-manager=local --experiment-name AQI_Classification_CI
         shell: bash -l {0}
 
       - name: Upload MLflow model artifacts
