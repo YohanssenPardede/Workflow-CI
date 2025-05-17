@@ -39,14 +39,12 @@ jobs:
         run: |
           mkdir -p MLProject/models
           cp -r MLProject/mlruns/*/*/artifacts/model/* MLProject/models/ || echo "Model not found"
-
+      
       - name: Commit and push model artifacts
         run: |
-          git config --global user.email "yohanssenpardede@gmail.com"
-          git config --global user.name "YohanssenPardede"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
           git pull origin main
           git add MLProject/models
           git commit -m "Add trained model artifact [CI skip]" || echo "Nothing to commit"
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{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}}
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
