@@ -30,14 +30,23 @@ jobs:
           auto-activate-base: false
           use-mamba: true
 
-      - name: Run MLflow project
+      - name: Prepare mlruns directory
         run: |
-          mlflow run MLProject/ --env-manager=local --experiment-name AQI_Classification_CI
-        shell: bash -l {0}
+          if [ -f mlruns ]; then
+            echo "Removing file named mlruns to avoid conflict"
+            rm mlruns
+          fi
+          mkdir -p mlruns
+
+      - name: Run modelling.py with MLflow tracking URI set
+        env:
+          MLFLOW_TRACKING_URI: file://${{ github.workspace }}/mlruns
+        run: |
+          python MLProject/modelling.py
 
       - name: Upload MLflow model artifacts
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: trained-model
-          path: outputs/mlruns/**/artifacts/model
+          path: mlruns/**/artifacts/model
