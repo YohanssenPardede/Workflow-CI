@@ -13,6 +13,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Cache conda environment
+        uses: actions/cache@v3
+        with:
+          path: ~/.conda/envs/aqi-env
+          key: ${{ runner.os }}-conda-env-${{ hashFiles('MLProject/conda.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-conda-env-
+
       - name: Set up Miniconda with mamba
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -21,10 +29,6 @@ jobs:
           auto-activate-base: false
           python-version: 3.10
           use-mamba: true
-
-      - name: Install dependencies
-        run: |
-          pip install mlflow scikit-learn pandas
 
       - name: Run MLflow project
         run: |
