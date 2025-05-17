@@ -23,23 +23,30 @@ max_depth_range = np.linspace(1, 50, 5, dtype=int)
 
 best_accuracy = 0
 best_model = None
+best_params = {}
 
-for n_estimators in n_estimators_range:
-    for max_depth in max_depth_range:
-        param_label = f"{n_estimators}_{max_depth}"
-        
-        with mlflow.start_run():
-            mlflow.log_param("n_estimators", n_estimators)
-            mlflow.log_param("max_depth", max_depth)
-
+# Gunakan satu run utama
+with mlflow.start_run():  # Hanya satu run aktif dari awal
+    for n_estimators in n_estimators_range:
+        for max_depth in max_depth_range:
             model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
             model.fit(X_train, y_train)
 
             y_pred = model.predict(X_test)
             accuracy = accuracy_score(y_test, y_pred)
-            mlflow.log_metric("accuracy", accuracy)
+
+            # Log setiap kombinasi parameter dan akurasinya
+            mlflow.log_metric(f"accuracy_{n_estimators}_{max_depth}", accuracy)
 
             if accuracy > best_accuracy:
                 best_accuracy = accuracy
                 best_model = model
-                mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
+                best_params = {"n_estimators": n_estimators, "max_depth": max_depth}
+
+    # Log best param dan model
+    mlflow.log_param("best_n_estimators", best_params["n_estimators"])
+    mlflow.log_param("best_max_depth", best_params["max_depth"])
+    mlflow.log_metric("best_accuracy", best_accuracy)
+
+    # Simpan dan daftarkan model terbaik
+    mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
