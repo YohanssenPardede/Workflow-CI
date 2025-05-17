@@ -1,9 +1,10 @@
 import mlflow
 import pandas as pd
+import numpas as np
+import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-import numpy as np
 
 mlflow.set_experiment("AQI_Classification_CI")
 
