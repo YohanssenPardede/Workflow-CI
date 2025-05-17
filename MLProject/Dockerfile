@@ -1,19 +1,17 @@
-FROM python:3.10-slim
+FROM continuumio/miniconda3
 
-# Set working directory
+# Copy environment file yang ada di folder MLProject (sama dengan Dockerfile)
+COPY conda.yml ./conda.yml
+
+# Install dependencies
+RUN conda env create -f conda.yml
+
+# Set environment
+ENV PATH /opt/conda/envs/aqi-env/bin:$PATH
+
+# Copy semua isi project (modelling.py dll) ke image
+COPY . /app
+
 WORKDIR /app
 
-# Copy requirement files
-COPY MLProject/conda.yml ./conda.yml
-
-# Install dependencies via conda (optional) or pip
-RUN pip install mlflow scikit-learn pandas joblib
-
-# Copy project code
-COPY . .
-
-# Expose port jika kamu ingin serve model
-EXPOSE 5000
-
-# Default command: jalankan script inference (kamu bisa ganti)
-CMD ["python", "serve_model.py"]
+CMD ["python", "modelling.py"]
