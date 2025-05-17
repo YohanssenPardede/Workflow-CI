@@ -1,0 +1,6 @@
+artifact_location: file:///home/runner/work/Workflow-CI/Workflow-CI/mlruns/874846430492246669
+creation_time: 1747495113931
+experiment_id: '874846430492246669'
+last_update_time: 1747495113931
+lifecycle_stage: active
+name: AQI_Classification_CI
