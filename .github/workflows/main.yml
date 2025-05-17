@@ -35,6 +35,7 @@ jobs:
 
       - name: Run MLflow project
         run: |
+          export MLFLOW_TRACKING_URI=./mlruns
           mlflow run MLProject/ --env-manager=local --experiment-name=AQI_Classification_CI
         shell: bash -l {0}
 
