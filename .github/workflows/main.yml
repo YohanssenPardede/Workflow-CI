@@ -40,13 +40,13 @@ jobs:
 
       - name: Copy model artifacts to repository folder
         run: |
-          mkdir -p MLProject/models
-          cp -r MLProject/mlruns/*/*/artifacts/model/* MLProject/models/ || echo "Model not found"
-      
-      - name: Commit and push MLflow artifacts
+          # (Langsung mengambil file joblib yang sudah disimpan)
+          ls -lh MLProject/models
+    
+      - name: Commit and push trained model artifact
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"          
+          git config --global user.name "github-actions[bot]"
           git pull origin main
           git add MLProject/models
           git commit -m "Add trained model artifact [CI skip]" || echo "Nothing to commit"
