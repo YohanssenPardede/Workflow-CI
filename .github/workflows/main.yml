@@ -21,13 +21,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-conda-env-
 
-      - name: Set up Miniconda with mamba
+      - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
+          python-version: 3.12.7
           activate-environment: aqi-env
           environment-file: MLProject/conda.yml
           auto-activate-base: false
-          python-version: 3.10
           use-mamba: true
 
       - name: Run MLflow project
