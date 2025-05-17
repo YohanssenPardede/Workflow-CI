@@ -1,6 +1,6 @@
 import mlflow
 import pandas as pd
-import numpas as np
+import numpy as np
 import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
