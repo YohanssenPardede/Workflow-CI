@@ -25,28 +25,24 @@ best_accuracy = 0
 best_model = None
 best_params = {}
 
-# Gunakan satu run utama
-with mlflow.start_run():  # Hanya satu run aktif dari awal
-    for n_estimators in n_estimators_range:
-        for max_depth in max_depth_range:
-            model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
-            model.fit(X_train, y_train)
+for n_estimators in n_estimators_range:
+    for max_depth in max_depth_range:
+        model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
+        model.fit(X_train, y_train)
 
-            y_pred = model.predict(X_test)
-            accuracy = accuracy_score(y_test, y_pred)
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
 
-            # Log setiap kombinasi parameter dan akurasinya
-            mlflow.log_metric(f"accuracy_{n_estimators}_{max_depth}", accuracy)
+        mlflow.log_metric(f"accuracy_{n_estimators}_{max_depth}", accuracy)
 
-            if accuracy > best_accuracy:
-                best_accuracy = accuracy
-                best_model = model
-                best_params = {"n_estimators": n_estimators, "max_depth": max_depth}
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            best_model = model
+            best_params = {"n_estimators": n_estimators, "max_depth": max_depth}
 
-    # Log best param dan model
-    mlflow.log_param("best_n_estimators", best_params["n_estimators"])
-    mlflow.log_param("best_max_depth", best_params["max_depth"])
-    mlflow.log_metric("best_accuracy", best_accuracy)
+# Log best param dan model setelah loop
+mlflow.log_param("best_n_estimators", best_params["n_estimators"])
+mlflow.log_param("best_max_depth", best_params["max_depth"])
+mlflow.log_metric("best_accuracy", best_accuracy)
 
-    # Simpan dan daftarkan model terbaik
-    mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
+mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
