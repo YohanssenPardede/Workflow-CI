@@ -27,17 +27,19 @@ best_model = None
 for n_estimators in n_estimators_range:
     for max_depth in max_depth_range:
         param_label = f"{n_estimators}_{max_depth}"
-        mlflow.log_param(f"n_estimators_{param_label}", n_estimators)
-        mlflow.log_param(f"max_depth_{param_label}", max_depth)
+        
+        with mlflow.start_run(nested=True):  # <--- Tambahkan ini
+            mlflow.log_param("n_estimators", n_estimators)
+            mlflow.log_param("max_depth", max_depth)
 
-        model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
-        model.fit(X_train, y_train)
+            model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
+            model.fit(X_train, y_train)
 
-        y_pred = model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        mlflow.log_metric(f"accuracy_{param_label}", accuracy)
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            mlflow.log_metric("accuracy", accuracy)
 
-        if accuracy > best_accuracy:
-            best_accuracy = accuracy
-            best_model = model
-            mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
+            if accuracy > best_accuracy:
+                best_accuracy = accuracy
+                best_model = model
+                mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
