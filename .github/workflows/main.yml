@@ -32,8 +32,8 @@ jobs:
 
       - name: Run MLflow project
         run: |
-          source activate aqi-env
           mlflow run MLProject/ --env-manager=local
+        shell: bash -l {0}
 
       - name: Upload MLflow model artifacts
         if: success()
