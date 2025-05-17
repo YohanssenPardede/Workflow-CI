@@ -40,9 +40,9 @@ jobs:
 
       - name: Copy model artifacts to repository folder
         run: |
-          # (Langsung mengambil file joblib yang sudah disimpan)
-          ls -lh MLProject/models
-    
+          echo "Contents of MLProject/models:"
+          ls -R MLProject/models
+
       - name: Commit and push trained model artifact
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
