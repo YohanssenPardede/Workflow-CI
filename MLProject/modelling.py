@@ -7,14 +7,9 @@ from sklearn.metrics import accuracy_score
 import numpy as np
 import os
 
-# Hapus file jika ada konflik nama
-if os.path.exists("mlruns") and not os.path.isdir("mlruns"):
-    os.remove("mlruns")
-
-# Buat folder baru
-os.makedirs("mlruns", exist_ok=True)
-
-mlflow.set_tracking_uri("file:MLProject/mlruns")
+mlruns_path = "outputs/mlruns"
+os.makedirs(mlruns_path, exist_ok=True)
+mlflow.set_tracking_uri(f"file:{mlruns_path}")
 mlflow.set_experiment("AQI_Classification_CI")
 
 df = pd.read_csv("aqi_preprocessing.csv")
