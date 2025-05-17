@@ -46,13 +46,8 @@ jobs:
       - name: Commit and push MLflow artifacts
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          
-          # Hapus folder mlruns agar git pull tidak gagal
-          rm -rf mlruns/
-          
+          git config --global user.name "github-actions[bot]"          
           git pull origin main
-          
-          git add mlruns/
+          git add MLProject/models
           git commit -m "Add trained model artifact [CI skip]" || echo "Nothing to commit"
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
