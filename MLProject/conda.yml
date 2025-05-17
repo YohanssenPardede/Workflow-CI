@@ -1,7 +1,7 @@
 name: aqi-env
 channels:
-  - defaults
   - conda-forge
+  - defaults
 dependencies:
   - python=3.10
   - pandas
