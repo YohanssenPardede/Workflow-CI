@@ -4,14 +4,10 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import numpy as np
-import os
 
 mlflow.set_experiment("AQI_Classification_CI")
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-csv_path = os.path.join(script_dir, "aqi_preprocessing.csv")
-df = pd.read_csv(csv_path)
-
+df = pd.read_csv("aqi_preprocessing.csv")
 features = ['CO AQI Value', 'Ozone AQI Value', 'NO2 AQI Value', 'PM2.5 AQI Value']
 target = 'AQI Category'
 
@@ -27,26 +23,21 @@ max_depth_range = np.linspace(1, 50, 5, dtype=int)
 
 best_accuracy = 0
 best_model = None
-best_params = {}
 
 for n_estimators in n_estimators_range:
     for max_depth in max_depth_range:
+        param_label = f"{n_estimators}_{max_depth}"
+        mlflow.log_param(f"n_estimators_{param_label}", n_estimators)
+        mlflow.log_param(f"max_depth_{param_label}", max_depth)
+
         model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
         model.fit(X_train, y_train)
 
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-
-        mlflow.log_metric(f"accuracy_{n_estimators}_{max_depth}", accuracy)
+        mlflow.log_metric(f"accuracy_{param_label}", accuracy)
 
         if accuracy > best_accuracy:
             best_accuracy = accuracy
             best_model = model
-            best_params = {"n_estimators": n_estimators, "max_depth": max_depth}
-
-# Log best param dan model setelah loop
-mlflow.log_param("best_n_estimators", best_params["n_estimators"])
-mlflow.log_param("best_max_depth", best_params["max_depth"])
-mlflow.log_metric("best_accuracy", best_accuracy)
-
-mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
+            mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
