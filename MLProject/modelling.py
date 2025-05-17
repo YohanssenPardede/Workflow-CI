@@ -8,11 +8,11 @@ import numpy as np
 import os
 
 # Hapus file jika ada konflik nama
-if os.path.exists("MLProject/mlruns") and not os.path.isdir("MLProject/mlruns"):
-    os.remove("MLProject/mlruns")
+if os.path.exists("mlruns") and not os.path.isdir("mlruns"):
+    os.remove("mlruns")
 
 # Buat folder baru
-os.makedirs("MLProject/mlruns", exist_ok=True)
+os.makedirs("mlruns", exist_ok=True)
 
 mlflow.set_tracking_uri("file:MLProject/mlruns")
 mlflow.set_experiment("AQI_Classification_CI")
