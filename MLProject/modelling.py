@@ -4,10 +4,14 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import numpy as np
+import os
 
 mlflow.set_experiment("AQI_Classification_CI")
 
-df = pd.read_csv("aqi_preprocessing.csv")
+script_dir = os.path.dirname(os.path.abspath(__file__))
+csv_path = os.path.join(script_dir, "aqi_preprocessing.csv")
+df = pd.read_csv(csv_path)
+
 features = ['CO AQI Value', 'Ozone AQI Value', 'NO2 AQI Value', 'PM2.5 AQI Value']
 target = 'AQI Category'
 
