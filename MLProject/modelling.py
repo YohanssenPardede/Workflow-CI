@@ -28,7 +28,7 @@ for n_estimators in n_estimators_range:
     for max_depth in max_depth_range:
         param_label = f"{n_estimators}_{max_depth}"
         
-        with mlflow.start_run(nested=True):  # <--- Tambahkan ini
+        with with mlflow.start_run():
             mlflow.log_param("n_estimators", n_estimators)
             mlflow.log_param("max_depth", max_depth)
 
