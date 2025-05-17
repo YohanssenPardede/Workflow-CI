@@ -41,3 +41,10 @@ for n_estimators in n_estimators_range:
             best_accuracy = accuracy
             best_model = model
             mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
+
+        if best_model:
+            os.makedirs("MLProject/models", exist_ok=True)
+            joblib.dump(
+                best_model,
+                "MLProject/models/best_model.joblib"
+            )
