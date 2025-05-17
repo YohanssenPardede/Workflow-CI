@@ -1,4 +1,5 @@
 import mlflow
+import mlflow.sklearn
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -23,21 +24,29 @@ max_depth_range = np.linspace(1, 50, 5, dtype=int)
 
 best_accuracy = 0
 best_model = None
+best_params = {}
 
-for n_estimators in n_estimators_range:
-    for max_depth in max_depth_range:
-        param_label = f"{n_estimators}_{max_depth}"
-        mlflow.log_param(f"n_estimators_{param_label}", n_estimators)
-        mlflow.log_param(f"max_depth_{param_label}", max_depth)
+with mlflow.start_run():
+    for n_estimators in n_estimators_range:
+        for max_depth in max_depth_range:
+            param_label = f"{n_estimators}_{max_depth}"
+            mlflow.log_param(f"n_estimators_{param_label}", n_estimators)
+            mlflow.log_param(f"max_depth_{param_label}", max_depth)
 
-        model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
-        model.fit(X_train, y_train)
+            model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
+            model.fit(X_train, y_train)
 
-        y_pred = model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        mlflow.log_metric(f"accuracy_{param_label}", accuracy)
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            mlflow.log_metric(f"accuracy_{param_label}", accuracy)
 
-        if accuracy > best_accuracy:
-            best_accuracy = accuracy
-            best_model = model
-            mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
+            if accuracy > best_accuracy:
+                best_accuracy = accuracy
+                best_model = model
+                best_params = {"n_estimators": n_estimators, "max_depth": max_depth}
+
+    # Log model terbaik sekali di akhir run
+    mlflow.log_param("best_n_estimators", best_params["n_estimators"])
+    mlflow.log_param("best_max_depth", best_params["max_depth"])
+    mlflow.log_metric("best_accuracy", best_accuracy)
+    mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
