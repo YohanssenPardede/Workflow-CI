@@ -34,9 +34,10 @@ jobs:
           use-mamba: true
 
       - name: Run MLflow project
+        working-directory: MLProject
         run: |
-          export MLFLOW_TRACKING_URI=./mlruns
-          mlflow run MLProject/ --env-manager=local --experiment-name=AQI_Classification_CI
+          export MLFLOW_TRACKING_URI=$(pwd)/mlruns
+          mlflow run . --env-manager=local --experiment-name=AQI_Classification_CI --no-conda
         shell: bash -l {0}
 
       - name: Copy model artifacts to repository folder
