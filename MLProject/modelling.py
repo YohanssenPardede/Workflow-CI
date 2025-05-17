@@ -44,8 +44,5 @@ for n_estimators in n_estimators_range:
             mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
 
         if best_model:
-            os.makedirs("MLProject/models", exist_ok=True)
-            joblib.dump(
-                best_model,
-                "MLProject/models/best_model.joblib"
-            )
+            os.makedirs("models", exist_ok=True)
+            joblib.dump(best_model, os.path.join("models", "best_model.joblib"))
