@@ -40,34 +40,33 @@ class AQIInput(BaseModel):
 @app.post("/predict")
 def predict(input_data: AQIInput):
     try:
-        features = [[
-            input_data.CO,
-            input_data.Ozone,
-            input_data.NO2,
-            input_data.PM25
-        ]]
-        np_features = np.array(features)
+        # Buat DataFrame sesuai urutan fitur yang benar
+        features_df = pd.DataFrame([{
+            "CO AQI Value": input_data.CO,
+            "Ozone AQI Value": input_data.Ozone,
+            "NO2 AQI Value": input_data.NO2,
+            "PM2.5 AQI Value": input_data.PM25
+        }])
 
+        # Logging input metrics
+        np_features = features_df.values
         input_feature_sum.set(np.sum(np_features))
         feature_average.set(np.mean(np_features))
         min_feature_value.set(np.min(np_features))
         max_feature_value.set(np.max(np_features))
 
         start_time = time.time()
-        prediction = model.predict(np_features)[0]
+        prediction = model.predict(features_df)[0]
         latency = time.time() - start_time
         model_latency.set(latency)
 
         prediction_count.inc()
         last_prediction.set(hash(str(prediction)) % 1000)
 
-        print(f"Prediction result: {prediction}")  # Tambah print ini
-
-        return {"prediction": prediction}
+        return {"prediction": int(prediction)}
 
     except Exception as e:
         predict_error.inc()
-        print(f"Error during prediction: {e}")  # Tambah print error di sini
         return {"error": str(e)}
 
 # Prometheus server (on port 9000)
