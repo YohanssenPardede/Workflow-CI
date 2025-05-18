@@ -40,36 +40,34 @@ class AQIInput(BaseModel):
 @app.post("/predict")
 def predict(input_data: AQIInput):
     try:
-        # Extract features in correct order
         features = [[
             input_data.CO,
             input_data.Ozone,
             input_data.NO2,
             input_data.PM25
         ]]
-        
         np_features = np.array(features)
 
-        # Log input stats
         input_feature_sum.set(np.sum(np_features))
         feature_average.set(np.mean(np_features))
         min_feature_value.set(np.min(np_features))
         max_feature_value.set(np.max(np_features))
 
-        # Measure latency
         start_time = time.time()
         prediction = model.predict(np_features)[0]
         latency = time.time() - start_time
         model_latency.set(latency)
 
-        # Update other metrics
         prediction_count.inc()
-        last_prediction.set(hash(str(prediction)) % 1000)  # Convert class to numeric hash for simplicity
+        last_prediction.set(hash(str(prediction)) % 1000)
+
+        print(f"Prediction result: {prediction}")  # Tambah print ini
 
         return {"prediction": prediction}
 
     except Exception as e:
         predict_error.inc()
+        print(f"Error during prediction: {e}")  # Tambah print error di sini
         return {"error": str(e)}
 
 # Prometheus server (on port 9000)
