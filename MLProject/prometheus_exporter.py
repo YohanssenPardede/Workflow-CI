@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from prometheus_client import start_http_server, Gauge, Counter
 import joblib
+import pandas as pd
 import numpy as np
 import uvicorn
 import threading
