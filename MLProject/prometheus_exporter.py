@@ -62,7 +62,7 @@ def predict(input_data: AQIInput):
         model_latency.set(latency)
 
         prediction_count.inc()
-        last_prediction.set(hash(str(prediction)) % 1000)
+        last_prediction.set(int(prediction))
 
         return {"prediction": int(prediction)}
 
