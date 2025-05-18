@@ -10,7 +10,7 @@ COPY conda.yml ./conda.yml
 RUN conda env create -f conda.yml && conda clean -afy
 
 # Set environment path
-ENV PATH /opt/conda/envs/aqi-env/bin:$PATH
+ENV PATH=/opt/conda/envs/aqi-env/bin:$PATH
 
 # Copy semua file project ke dalam image
 COPY . /app
