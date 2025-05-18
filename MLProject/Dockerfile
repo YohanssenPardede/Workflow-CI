@@ -1,24 +1,21 @@
 FROM continuumio/miniconda3
 
-# Buat shell default agar bisa menggunakan conda environment
-SHELL ["conda", "run", "-n", "aqi-env", "/bin/bash", "-c"]
-
 # Salin environment YAML
-COPY conda.yml ./conda.yml
+COPY conda.yml /tmp/conda.yml
 
-# Install dependencies dan environment
-RUN conda env create -f conda.yml && conda clean -afy
+# Buat environment dan bersihkan cache
+RUN conda env create -f /tmp/conda.yml && conda clean -afy
 
-# Set environment path
+# Tambahkan path environment ke PATH
 ENV PATH=/opt/conda/envs/aqi-env/bin:$PATH
 
 # Copy semua file project ke dalam image
 COPY . /app
 WORKDIR /app
 
-# Expose port untuk FastAPI dan Prometheus
+# Expose port untuk FastAPI dan Prometheus (opsional)
 EXPOSE 8000
 EXPOSE 9000
 
-# Default command saat container dijalankan (bisa diubah saat docker run)
+# Default command saat container dijalankan
 CMD ["python", "prometheus_exporter.py"]
