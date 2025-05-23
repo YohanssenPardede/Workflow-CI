@@ -8,6 +8,7 @@ Pipeline ini otomatis:
 ## 📁 Struktur Direktori
 
 ```
+Workflow-CI
 ├── MLProject/
 │   ├── models
 │   ├── Dockerfile             
