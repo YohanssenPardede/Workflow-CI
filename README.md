@@ -63,11 +63,11 @@ Workflow `.github/workflows/main.yml` (`Train AQI Model and Save to Repo`) berja
    * Commit message: `"Add trained model artifact [CI skip]"`
 
 ## 🐳 Docker Build & Push
+Anda dapat mengakses Docker Hub untuk push image pada tautan [berikut](https://hub.docker.com/r/yohanssenpardede/aqi-model).
 Setelah job `train` selesai, job `docker` akan:
 1. **Checkout** kode
 2. **Login** ke Docker Hub (via `DOCKERHUB_USERNAME` & `DOCKERHUB_TOKEN`)
 3. **Build & push** image dari `MLProject/Dockerfile`
-
    * Tag `latest`
    * Tag SHA komit, misal: `yohanssenpardede/aqi-model:4f123ab`
 
@@ -82,7 +82,16 @@ with:
     ${{ secrets.DOCKERHUB_USERNAME }}/aqi-model:latest
     ${{ secrets.DOCKERHUB_USERNAME }}/aqi-model:${{ github.sha }}
 ```
-Anda dapat mengakses Docker Hub untuk push image pada tautan [berikut](https://hub.docker.com/r/yohanssenpardede/aqi-model).
+
+4. **Menjalankan Aplikasi (`CMD ["python", "prometheus_exporter.py"]`):**
+`CMD ["python", "prometheus_exporter.py"]`: Ini adalah perintah default yang akan dijalankan saat kontainer Docker dimulai **jika tidak ada perintah lain yang ditentukan saat menjalankan kontainer**. Dengan perintah ini, `prometheus_exporter.py` akan dieksekusi menggunakan interpreter Python dari lingkungan Conda yang telah dibuat. Skrip ini akan memulai server HTTP di port 9000 (sesuai konvensi dan tujuan `prometheus_exporter.py`) dan mulai mengekspos metrik yang telah didefinisikan di dalamnya.
+
+**Bagaimana `prometheus_exporter.py` di-*serving*:**
+Ketika *image* Docker ini dibangun dan kemudian kontainer dijalankan (misalnya, dengan `docker run -p 9000:9000 <nama_image_docker>`), hal-hal berikut terjadi:
+1. Kontainer dimulai, dan direktori `/app` menjadi direktori kerja.
+2. Perintah `python prometheus_exporter.py` dieksekusi.
+3. Skrip `prometheus_exporter.py` (yang seharusnya berisi kode untuk mengumpulkan metrik dan menjalankan server HTTP menggunakan pustaka seperti `prometheus_client`) akan memulai server di port yang ditentukan di dalam skrip itu sendiri (biasanya 9000).
+4. Karena port 9000 diekspos (`EXPOSE 9000` di `Dockerfile`) dan diterbitkan (`-p 9000:9000` saat `docker run`), aplikasi Prometheus di luar kontainer dapat mengakses metrik dari kontainer ini dengan melakukan *scraping* (mengambil data) dari alamat IP kontainer di port 9000.
 
 ## 🔑 Secrets & Permissions
 * **GITHUB\_TOKEN**:
