@@ -86,7 +86,8 @@ with:
 4. **Menjalankan Aplikasi (`CMD ["python", "prometheus_exporter.py"]`):**
 `CMD ["python", "prometheus_exporter.py"]`: Ini adalah perintah default yang akan dijalankan saat kontainer Docker dimulai **jika tidak ada perintah lain yang ditentukan saat menjalankan kontainer**. Dengan perintah ini, `prometheus_exporter.py` akan dieksekusi menggunakan interpreter Python dari lingkungan Conda yang telah dibuat. Skrip ini akan memulai server HTTP di port 9000 (sesuai konvensi dan tujuan `prometheus_exporter.py`) dan mulai mengekspos metrik yang telah didefinisikan di dalamnya.
 
-**Bagaimana `prometheus_exporter.py` di-*serving*:**
+**Bagaimana `prometheus_exporter.py` di-*serving*?**
+
 Ketika *image* Docker ini dibangun dan kemudian kontainer dijalankan (misalnya, dengan `docker run -p 9000:9000 <nama_image_docker>`), hal-hal berikut terjadi:
 1. Kontainer dimulai, dan direktori `/app` menjadi direktori kerja.
 2. Perintah `python prometheus_exporter.py` dieksekusi.
