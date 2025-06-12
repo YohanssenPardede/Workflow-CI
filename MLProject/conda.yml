@@ -13,4 +13,3 @@ dependencies:
   - pip
   - pip:
     - ipykernel 
-    - protobuf<=3.20.1 
