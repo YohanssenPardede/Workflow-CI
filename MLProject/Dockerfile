@@ -18,4 +18,4 @@ EXPOSE 8000
 EXPOSE 9000
 
 # Default command saat container dijalankan
-CMD ["python", "prometheus_exporter.py"]
+CMD ["python", "modelling.py"]
