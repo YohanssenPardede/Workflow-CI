@@ -11,7 +11,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder # Untuk mengkodekan target string
 
 # --- MLflow Setup ---
-mlflow.set_experiment("AQI_Classification_DNN_CI") # Mengubah nama eksperimen agar tidak bentrok
+mlflow.set_experiment("AQI_Classification_CI") # Mengubah nama eksperimen agar tidak bentrok
 
 # --- Data Loading and Preparation ---
 df = pd.read_csv("aqi_preprocessing.csv")
