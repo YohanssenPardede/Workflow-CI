@@ -1,15 +1,19 @@
 import mlflow
 import pandas as pd
 import numpy as np
-import joblib
 import os
 import time
-from sklearn.ensemble import RandomForestClassifier
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder # Untuk mengkodekan target string
 
-mlflow.set_experiment("AQI_Classification_CI")
+# --- MLflow Setup ---
+mlflow.set_experiment("AQI_Classification_DNN_CI") # Mengubah nama eksperimen agar tidak bentrok
 
+# --- Data Loading and Preparation ---
 df = pd.read_csv("aqi_preprocessing.csv")
 features = ['CO AQI Value', 'Ozone AQI Value', 'NO2 AQI Value', 'PM2.5 AQI Value']
 target = 'AQI Category'
@@ -17,49 +21,82 @@ target = 'AQI Category'
 X = df[features]
 y = df[target]
 
+# Menggunakan LabelEncoder untuk mengonversi target string ke integer
+label_encoder = LabelEncoder()
+y_encoded = label_encoder.fit_transform(y)
+
+# Memastikan jumlah kelas sesuai dengan lapisan output model Keras
+num_classes = len(label_encoder.classes_)
+print(f"Jumlah kategori AQI unik: {num_classes}")
+
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, stratify=y, random_state=42
+    X, y_encoded, test_size=0.2, stratify=y_encoded, random_state=42
 )
 
-# Log some dataset related metrics
+# --- MLflow Logging: Dataset Metrics ---
 mlflow.log_metric("train_samples", len(X_train))
 mlflow.log_metric("test_samples", len(X_test))
 mlflow.log_metric("num_features", len(features))
+mlflow.log_metric("num_target_classes", num_classes)
 
-n_estimators_range = np.linspace(10, 1000, 5, dtype=int)
-max_depth_range = np.linspace(1, 50, 5, dtype=int)
+# --- TensorFlow/Keras Model Definition and Training ---
+with mlflow.start_run(): # Setiap run MLflow akan mencatat satu pelatihan model
+    # Log Keras model parameters
+    mlflow.log_param("optimizer", "adam")
+    mlflow.log_param("loss_function", "sparse_categorical_crossentropy")
+    mlflow.log_param("dense_layer_1_units", 64)
+    mlflow.log_param("dropout_rate_1", 0.2)
+    mlflow.log_param("dense_layer_2_units", 32)
+    mlflow.log_param("dropout_rate_2", 0.2)
+    mlflow.log_param("output_layer_units", num_classes) # Pastikan ini sesuai dengan num_classes
+    mlflow.log_param("activation_output", "softmax")
 
-best_accuracy = 0
-best_model = None
-iteration = 0
+    epochs = 50
+    batch_size = 64
+    mlflow.log_param("epochs", epochs)
+    mlflow.log_param("batch_size", batch_size)
 
-for n_estimators in n_estimators_range:
-    for max_depth in max_depth_range:
-        iteration += 1
-        param_label = f"{n_estimators}_{max_depth}"
-        
-        mlflow.log_param(f"n_estimators_{param_label}", n_estimators)
-        mlflow.log_param(f"max_depth_{param_label}", max_depth)
-        
-        start_time = time.time()
-        model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
-        model.fit(X_train, y_train)
-        training_duration = time.time() - start_time
-        
-        y_pred = model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        
-        mlflow.log_metric(f"accuracy_{param_label}", accuracy)
-        mlflow.log_metric(f"training_duration_{param_label}", training_duration)
-        mlflow.log_metric(f"iteration", iteration)
-        mlflow.log_metric(f"is_best_model_{param_label}", 1 if accuracy > best_accuracy else 0)
-        mlflow.log_metric(f"accuracy_diff_{param_label}", accuracy - best_accuracy)
-        
-        if accuracy > best_accuracy:
-            best_accuracy = accuracy
-            best_model = model
-            mlflow.sklearn.log_model(best_model, artifact_path="model", registered_model_name="RandomForestAQI")
+    model = keras.Sequential([
+        layers.Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
+        layers.Dropout(0.2),
+        layers.Dense(32, activation='relu'),
+        layers.Dropout(0.2),
+        layers.Dense(num_classes, activation='softmax') # Menggunakan num_classes
+    ])
 
-if best_model:
+    model.compile(optimizer='adam',
+                  loss='sparse_categorical_crossentropy',
+                  metrics=['accuracy'])
+
+    print(model.summary()) # Menampilkan ringkasan model
+
+    start_time = time.time()
+    history = model.fit(X_train, y_train,
+                        epochs=epochs,
+                        batch_size=batch_size,
+                        validation_data=(X_test, y_test),
+                        verbose=1) # Set verbose ke 1 untuk melihat progress training
+    training_duration = time.time() - start_time
+    mlflow.log_metric("training_duration_seconds", training_duration)
+
+    # Evaluate the model on the test set
+    loss, accuracy = model.evaluate(X_test, y_test, verbose=0)
+    print(f"Test Accuracy: {accuracy:.4f}")
+    print(f"Test Loss: {loss:.4f}")
+
+    # Log metrics from the final evaluation
+    mlflow.log_metric("final_test_accuracy", accuracy)
+    mlflow.log_metric("final_test_loss", loss)
+
+    # Log the trained Keras model
+    # MLflow memiliki integrasi langsung dengan Keras/TensorFlow
+    mlflow.tensorflow.log_model(model, artifact_path="model", registered_model_name="TensorFlowAQI")
+    print("Model TensorFlow dicatat ke MLflow.")
+
+    # Simpan model secara lokal juga (opsional, karena sudah dicatat oleh MLflow)
     os.makedirs("models", exist_ok=True)
-    joblib.dump(best_model, os.path.join("models", "best_model.joblib"))
+    model_save_path = os.path.join("models", "air_quality_dnn_model.h5")
+    model.save(model_save_path)
+    print(f"Model TensorFlow disimpan secara lokal di: {model_save_path}")
+
+print("\nEksperimen selesai. Periksa UI MLflow untuk detail lebih lanjut.")
